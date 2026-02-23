@@ -39,6 +39,7 @@
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
+            <version>1.18.32</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
@@ -73,6 +74,15 @@
 			<version>2.0.4</version>
 		</dependency>
 
+        <!-- Start Logstash dependencies-->
+        <dependency>
+            <groupId>net.logstash.logback</groupId>
+            <artifactId>logstash-logback-encoder</artifactId>
+            <version>7.4</version>
+        </dependency>
+        <!--End Logstash dependencies -->
+
+        <!--Start Circuite breaker dependencies -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
@@ -86,7 +96,7 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-aop</artifactId>
 		</dependency>
-
+        <!--End Circuite breaker dependencies -->
 	</dependencies>
 
 	<dependencyManagement>
@@ -99,6 +109,7 @@
 				<scope>import</scope>
 			</dependency>
 		</dependencies>
+
 	</dependencyManagement>
 
 	<build>

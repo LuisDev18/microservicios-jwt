@@ -37,7 +37,7 @@ public class EmployeeController {
 
     @Operation(summary = "Get Employee By Id", description = "This API is used to get employee by id")
     @ApiResponse(responseCode = "200", description = "Employee retrieved successfully")
-    @GetMapping(name = "/{id}", produces = "application/json")
+    @GetMapping(value="/{id}", produces = "application/json")
     public ResponseEntity<WrapperResponse<ApiResponseDto>> getEmployeeById(@PathVariable("id") Long id) {
         ApiResponseDto employeeDto = employeeService.getEmployeeById(id);
         return new WrapperResponse<>(employeeDto, "success", Instant.now(), "Employee retrieved successfully").createResponse(HttpStatus.OK);

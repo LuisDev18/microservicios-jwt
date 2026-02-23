@@ -39,10 +39,10 @@ public class DepartmentController {
 
     @Operation(summary = "Get a department",
             description = "Get a department object from the database")
-    @GetMapping("/{department-code}")
-   public ResponseEntity<WrapperResponse<DepartmentDto>> getDepartment(@PathVariable ("department-code") String deparmentCode){
+    @GetMapping(value="/{department-code}")
+   public ResponseEntity<DepartmentDto> getDepartment(@PathVariable ("department-code") String deparmentCode){
         DepartmentDto departmentDto=departmentService.getDepartmentByCode(deparmentCode);
-        return new WrapperResponse<>(departmentDto,"ok",Instant.now(),"Department retrieved successfully").createResponse(HttpStatus.OK);
+        return new ResponseEntity<>(departmentDto,HttpStatus.OK);
     }
 
 }

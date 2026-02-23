@@ -7,6 +7,7 @@ import com.example.employeeservices.dto.EmployeeDto;
 import com.example.employeeservices.dto.OrganizationDto;
 import com.example.employeeservices.entity.Employee;
 import com.example.employeeservices.exception.ResourceNotFoundException;
+import com.example.employeeservices.helper.ExternalServiceClient;
 import com.example.employeeservices.repository.EmployeeRepository;
 import com.example.employeeservices.service.APIClient;
 import com.example.employeeservices.service.EmployeeService;
@@ -29,9 +30,8 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     private final EmployeeRepository employeeRepository;
     private final EmployeeConverter employeeConverter;
-    //private final RestTemplate restTemplate;
-    private final WebClient webClient;
-   // private final APIClient apiClient;
+    private final ExternalServiceClient externalServiceClient;
+    //private final APIClient apiClient;
 
 
     @Override
@@ -42,61 +42,26 @@ public class EmployeeServiceImpl implements EmployeeService {
         return employeeConverter.toDto(employeeDb);
     }
 
-    //@CircuitBreaker(name = "${spring.application.name", fallbackMethod = "getDefaultDepartment")
-    @Retry(name = "${spring.application.name}", fallbackMethod = "getDefaultDepartment")
     @Override
     public ApiResponseDto getEmployeeById(Long id) {
+        log.info("Iniciando flujo de empleado: {}", id);
 
-       log.info("Inside getEmployeeById() method");
-       Employee employee = employeeRepository.findById(id).orElseThrow(
-                () -> new ResourceNotFoundException("Employee", "id", id));
-
-      // Ejemplo de uso de WebClient
-
-        DepartmentDto departmentDto =   webClient.get().
-                uri(Constant.DEPARTMENT_BASE_URL + employee.getDepartmentCode())
-                .retrieve()
-                .bodyToMono(DepartmentDto.class)
-                .block();
-
-        //Ejemplo usando Feign Client
-        //DepartmentDto departmentDto = apiClient.getDepartment(employee.getDepartmentCode());
-
-        OrganizationDto organizationDto = webClient.get()
-                .uri(Constant.ORGANIZATION_BASE_URL +"/msvc/"+ employee.getOrganizationCode())
-                .retrieve()
-                .bodyToMono(OrganizationDto.class)
-                .block();
+        var employee = findEmployeeById(id);
+        DepartmentDto departmentDto = externalServiceClient.getDepartment(employee.getDepartmentCode());
+        OrganizationDto organizationDto = externalServiceClient.getOrganization(employee.getOrganizationCode());
 
         ApiResponseDto apiResponseDto = new ApiResponseDto();
+        apiResponseDto.setEmployeeDto(employeeConverter.toDto(employee));
         apiResponseDto.setDepartmentDto(departmentDto);
         apiResponseDto.setOrganizationDto(organizationDto);
-        apiResponseDto.setEmployeeDto(employeeConverter.toDto(employee));
 
         return apiResponseDto;
     }
 
-    public ApiResponseDto getDefaultDepartment(Long id, Exception e){
-        log.info("Inside getDefaultDepartment() method");
-        Employee employee = employeeRepository.findById(id).orElseThrow(
-                () -> new ResourceNotFoundException("Employee", "id", id));
+    private Employee findEmployeeById(Long id) {
+        return employeeRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Employee", "id", id));
 
-        DepartmentDto departmentDto = new DepartmentDto();
-        departmentDto.setDepartmentCode("RBD1");
-        departmentDto.setDepartmentName("Default Department");
-        departmentDto.setDepartmentDescription("Default Department Description");
-
-
-        ApiResponseDto apiResponseDto = new ApiResponseDto();
-        apiResponseDto.setDepartmentDto(departmentDto);
-        apiResponseDto.setEmployeeDto(employeeConverter.toDto(employee));
-
-        return apiResponseDto;
     }
+
 }
-   /* Ejemplo de uso de RestTemplate
-     ResponseEntity<DepartmentDto> departmentDtoResponseEntity =  restTemplate.getForEntity("http://localhost:8082/api/v1/departments/" + employee.getDepartmentCode(), DepartmentDto.class);
-
-      log.info("http://localhost:8082/api/v1/departments/" + employee.getDepartmentCode());
-      log.info(departmentDtoResponseEntity.getBody().toString());
-      DepartmentDto departmentDto = departmentDtoResponseEntity.getBody();*/

@@ -37,16 +37,9 @@ public class OrganizationController {
 
     @Operation(summary = "Get a organization",
             description = "Get a organization object in the database")
-    @GetMapping(name="/msvc/{Code}", produces="application/json")
+    @GetMapping(value="/msvc/{Code}", produces="application/json")
     public ResponseEntity<OrganizationDto> getOrganizationWebClient(@PathVariable(value= "Code") String organizationCode){
         OrganizationDto organizationResponse = organizationService.getOrganizationByCode(organizationCode);
         return new ResponseEntity<>(organizationResponse,HttpStatus.OK);
     }
-
-   /* @GetMapping(name="/{Code}", produces = "application/json")
-    public ResponseEntity<WrapperResponse<OrganizationDto>> getOrganization(@PathVariable(value= "Code") String organizationCode){
-        OrganizationDto organizationResponse = organizationService.getOrganizationByCode(organizationCode);
-        return new WrapperResponse<>(organizationResponse,"ok", "Organization saved successfully").createResponse(HttpStatus.CREATED);
-    }*/
-
 }
